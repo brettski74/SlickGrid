@@ -123,7 +123,7 @@ if (typeof Slick === "undefined") {
         var stylesheet;
         var viewportH, viewportW;
         var viewportHasHScroll;
-        var headerColumnWidthDiff, headerColumnHeightDiff, cellWidthDiff, cellHeightDiff;  // padding+border
+        var headerColumnWidthDiff, headerColumnHeightDiff, rowWidthDiff, cellWidthDiff, cellHeightDiff;  // padding+border
         var absoluteColumnMinWidth;
 
         var activeRow, activeCell;
@@ -676,12 +676,14 @@ if (typeof Slick === "undefined") {
 
             var r = $("<div class='slick-row' />").appendTo($canvas);
             el = $("<div class='slick-cell' id='' style='visibility:hidden'>-</div>").appendTo(r);
-            cellWidthDiff = cellHeightDiff = 0;
+            rowWidthDiff = cellWidthDiff = cellHeightDiff = 0;
             $.each(h, function(n,val) { cellWidthDiff += parseFloat(el.css(val)) || 0; });
             $.each(v, function(n,val) { cellHeightDiff += parseFloat(el.css(val)) || 0; });
+            $.each(h, function(n,val) { rowWidthDiff += parseFloat(r.css(val)) || 0; });
+            $.each(v, function(n,val) { cellHeightDiff += parseFloat(r.css(val)) || 0; });
             r.remove();
 
-            absoluteColumnMinWidth = Math.max(headerColumnWidthDiff,cellWidthDiff);
+            absoluteColumnMinWidth = Math.max(headerColumnWidthDiff,cellWidthDiff + rowWidthDiff);
         }
 
         function createCssRules() {
@@ -784,7 +786,7 @@ if (typeof Slick === "undefined") {
             var i, c,
                 widths = [],
                 shrinkLeeway = 0,
-                availWidth = (options.autoHeight ? viewportW : viewportW - scrollbarDimensions.width), // with AutoHeight, we do not need to accomodate the vertical scroll bar
+                availWidth = (options.autoHeight ? viewportW : viewportW - scrollbarDimensions.width - rowWidthDiff), // with AutoHeight, we do not need to accomodate the vertical scroll bar
                 total = 0,
                 existingTotal = 0;
 
@@ -1158,6 +1160,7 @@ if (typeof Slick === "undefined") {
             while (i--) {
                 w += columns[i].currentWidth || columns[i].width;
             }
+            w += rowWidthDiff;
             setCanvasWidth(w);
 
             updateRowCount();
